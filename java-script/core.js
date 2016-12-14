@@ -23,6 +23,10 @@ var System = function(_settings){
         eval(_fileString);
     }
     
+    this.run = function(_fnc){
+        setTimeout(_fnc, 0);
+    }
+    
     /**
      * Private Method
      */
