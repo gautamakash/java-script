@@ -77,7 +77,7 @@ var System = function(_settings){
     }
     var _initiateAspect = function( _fileString, _libPath, _instance){
         
-        var _aspectString = _getFile(_libPath+"/aspect.js", false, _instance);
+        var _aspectString = _getFile(_libPath+"/defaultAspect.js", false, _instance);
         
         var _aspectRegex = new RegExp("function[ ]{0,}(.*){", "");
         var _functionArr = _fileString.match(_aspectRegex);
