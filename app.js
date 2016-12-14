@@ -1,7 +1,7 @@
-var system = new System();
+var system = new System({debug: false});
 
 system.import("com.magnifyall.Hello");
 
-var hello = new com.magnifyall.Hello("Akash Gautam");
+var hello = new com.magnifyall.Hello("Hello Akash Gautam!");
 
-console.log(hello.greet());
+hello.greet(document.getElementById("greeting"));
