@@ -17,4 +17,6 @@ var user = new com.magnifyall.UserProfile({
         country: "Earth United"
     }
 });
-user.render("#user-detail");
+user.__render("#user-detail");
+user.__render("#user-detail1", '<h2>{{name}}</h2>');
+user.__render("#user-detail2", false, user.__getCurrentPath()+'.detail.html');

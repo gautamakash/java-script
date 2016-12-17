@@ -26,3 +26,24 @@ this.__update = function(){
         }
     }
 }
+var _instance = this;
+this.__render=function(_selector, _template, _templateUrl){
+    if(!_template && _templateUrl){
+        _template = systems[_system].getFile(_templateUrl, false, systems[_system]);
+    }
+    var _target = document.querySelector(_selector);
+    if(_target && _target.innerHTML !== undefined){
+        systems[_system].processTemplate(_target, _currentPath, _template, this);
+    }
+}
+this.__getCurrentPath = function(){
+    return _currentPath;
+}
+this.serialize = function(){
+    var _localInstance = JSON.parse(JSON.stringify(this));
+    delete _localInstance.__bind;
+    return JSON.stringify(_localInstance);
+}
+this.equal = function(_ele){
+    return (this.serialize() === _ele.serialize());
+}
