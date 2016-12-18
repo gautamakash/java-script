@@ -1,32 +1,53 @@
 /**
  * Core Class
  */
+// Define system core package
 var systems = {};
+// Define System Class
 var System = function(_settings){
     /**
      * Create Public Variables
      */
-    this.name = (_settings && _settings.name)?_settings.name:"default"; // System Name
+    // System name (unique) use to access anywhere to get specific system by systems[name]
+    this.name = (_settings && _settings.name)?_settings.name:"default";
+    // If system with name is already exist
     if(systems[this.name]){
+        // then return system which make sure a singleton system per name
         return systems[this.name];
     }else{
+        // assign system name
         systems[this.name] = this;
     }
-    this.src = (_settings && _settings.src)?_settings.src:"src"; // src folder for the application
-    this.lib = (_settings && _settings.lib)?_settings.lib:"java-script"; // src folder for the application
-    this.templateExt = (_settings && _settings.templateExt)?_settings.templateExt:".html"; // src folder for the application
+    // Source folder where packages are store, can be relative to application or absolute path
+    this.src = (_settings && _settings.src)?_settings.src:"src";
+    // Java-script.js lib folder path , can be absolute or application relative
+    this.lib = (_settings && _settings.lib)?_settings.lib:"java-script";
+    // Default Template Extention, can be any thing like html, php, asp, htm, jsp ...
+    this.templateExt = (_settings && _settings.templateExt)?_settings.templateExt:".html";
+    // System Cache
     this.__cache = {};
     
-    this.debug = (_settings && _settings.debug)?_settings.debug:false; // src folder for the application
+    // If enable then log actual class on console
+    this.debug = (_settings && _settings.debug)?_settings.debug:false;
+    
     /**
      * Privat variables
      */
     
+    // beanFactory configuration where {{id}} will be replace by object ID
+    /**
+     * Example:
+     * {
+        "com.magnifyall.UserProfile":{
+            url: "data/user/{{id}}"
+        }
+     */
     this.beanConfig = (_settings && _settings.beanFactory)?_settings.beanFactory:false;
     
     /**
      * Public Methods
      */
+    // Import Global function which initiate and load package in runtime and proxy the classes
     this.import = function (_filePath) {
         var _fileString = this.getFile(_extractPath(_filePath, this.src)+'.js', false, this);
         _fileString = _initiatePackage(_filePath, _fileString);
@@ -35,15 +56,14 @@ var System = function(_settings){
             console.log(_fileString);
         }
         eval(_fileString);
-    }
+    };
     
+    // Create new thread and execute code.
     this.run = function(_fnc){
         setTimeout(_fnc, 0);
-    }
+    };
     
-    /**
-     * Private Method
-     */
+    // return String value from response take file path, should cache, system
     this.getFile = function(_filePath, uncached, _instance){
         var _returnString = "";
         if(!uncached && _instance.__cache[_filePath]){
@@ -62,47 +82,9 @@ var System = function(_settings){
             }
         }
         return _returnString;
-    }
-    var _extractPath = function(_filePath, _basePath){
-        var _fileArr = _filePath.split('.');
-        var _retObj = _basePath;
-        for(var _fileArrI = 0; _fileArrI < _fileArr.length; _fileArrI++){
-            _retObj+= "/"+_fileArr[_fileArrI];
-        }
-        return _retObj;
-    }
-    var _initiatePackage = function(_filePath, _fileString){
-        var _fileArr = _filePath.split('.');
-        var _baseObj = window;
-        var _className = "";
-        for(var _fileArrI = 0; _fileArrI < _fileArr.length; _fileArrI++){
-            if(_fileArr.length>1 && _fileArrI < _fileArr.length-1){
-                _baseObj[_fileArr[_fileArrI]] = _baseObj[_fileArr[_fileArrI]] || {};
-                _baseObj = _baseObj[_fileArr[_fileArrI]];
-            }else{
-                _className = _fileArr[_fileArrI];
-            }            
-        }
-        var _methodRegEx = new RegExp(_className+"[ ]{0,}=", "g");
-        _fileString = _fileString.replace(_methodRegEx, _filePath+" =");
-        
-        return _fileString;
-    }
-    var _initiateAspect = function( _fileString, _libPath, _basePath, _filePath, _instance){
-        
-        var _aspectString = _instance.getFile(_libPath+"/defaultAspect.js", false, _instance);
-        var _currentPackage = _filePath;
-        var _currentPath = _extractPath(_filePath, _basePath);
-        _aspectString += ' var _currentPackage = "'+_currentPackage+'"; ';
-        _aspectString += ' var _currentPath = "'+_currentPath+'"; ';
-        _aspectString += ' var _system = "'+_instance.name+'"; ';
-        var _aspectRegex = new RegExp("function[ ]{0,}(.*){", "");
-        var _functionArr = _fileString.match(_aspectRegex);
-        var _preFunctionString = _fileString.substring(0,_functionArr.index+_functionArr['0'].length);        
-        var _postFunctionString = _fileString.substring(_functionArr.index+_functionArr['0'].length, _fileString.length);
-        _fileString = _preFunctionString+" "+_aspectString+" "+_postFunctionString;
-        return _fileString;
-    }
+    };
+    
+    // Render value in target from currentPath or template with values from instance
     this.processTemplate = function(_target, _currentPath, _template, _instance){
         var templateStr = "";
         try{
@@ -137,8 +119,12 @@ var System = function(_settings){
                 _instance.__paint(_bindEles[_bindI], _variables[_key]);
             }
         }
-    }
+    };
+    
+    // Bean factory beans
     this.beans = {};
+    
+    // return/create Bean which is configure in beanFactory, must has package and id of pojo
     this.getBean = function(_class, _id){
         if(this.beanConfig && this.beanConfig[_class]){
             this.import(_class);
@@ -170,5 +156,55 @@ var System = function(_settings){
             }
             return _bean;
         }
-    } 
+    };
+    
+    /**
+     * Private Method
+     */
+    
+    // Extract and return path from package
+    var _extractPath = function(_filePath, _basePath){
+        var _fileArr = _filePath.split('.');
+        var _retObj = _basePath;
+        for(var _fileArrI = 0; _fileArrI < _fileArr.length; _fileArrI++){
+            _retObj+= "/"+_fileArr[_fileArrI];
+        }
+        return _retObj;
+    };
+    
+    // create package and update package in string class defination
+    var _initiatePackage = function(_filePath, _fileString){
+        var _fileArr = _filePath.split('.');
+        var _baseObj = window;
+        var _className = "";
+        for(var _fileArrI = 0; _fileArrI < _fileArr.length; _fileArrI++){
+            if(_fileArr.length>1 && _fileArrI < _fileArr.length-1){
+                _baseObj[_fileArr[_fileArrI]] = _baseObj[_fileArr[_fileArrI]] || {};
+                _baseObj = _baseObj[_fileArr[_fileArrI]];
+            }else{
+                _className = _fileArr[_fileArrI];
+            }            
+        }
+        var _methodRegEx = new RegExp(_className+"[ ]{0,}=", "g");
+        _fileString = _fileString.replace(_methodRegEx, _filePath+" =");
+        
+        return _fileString;
+    };
+    
+    // Update String function with Aspects
+    var _initiateAspect = function( _fileString, _libPath, _basePath, _filePath, _instance){
+        
+        var _aspectString = _instance.getFile(_libPath+"/defaultAspect.js", false, _instance);
+        var _currentPackage = _filePath;
+        var _currentPath = _extractPath(_filePath, _basePath);
+        _aspectString += ' var _currentPackage = "'+_currentPackage+'"; ';
+        _aspectString += ' var _currentPath = "'+_currentPath+'"; ';
+        _aspectString += ' var _system = "'+_instance.name+'"; ';
+        var _aspectRegex = new RegExp("function[ ]{0,}(.*){", "");
+        var _functionArr = _fileString.match(_aspectRegex);
+        var _preFunctionString = _fileString.substring(0,_functionArr.index+_functionArr['0'].length);        
+        var _postFunctionString = _fileString.substring(_functionArr.index+_functionArr['0'].length, _fileString.length);
+        _fileString = _preFunctionString+" "+_aspectString+" "+_postFunctionString;
+        return _fileString;
+    }; 
 }
