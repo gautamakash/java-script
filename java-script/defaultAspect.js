@@ -1,3 +1,8 @@
+/*
+ java-script.js v0.0.0
+ (c) 2016-2017 Akash Gautam . http://www.magnifyall.com
+ License: MIT
+*/
 // binded dom object
 this.__bind = [];
 // paint and bind dom with data

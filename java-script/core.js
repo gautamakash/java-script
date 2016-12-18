@@ -1,6 +1,8 @@
-/**
- * Core Class
- */
+/*
+ java-script.js v0.0.0
+ (c) 2016-2017 Akash Gautam . http://www.magnifyall.com
+ License: MIT
+*/
 // Define system core package
 var systems = {};
 // Define System Class
