@@ -39,6 +39,10 @@ this.__render=function(_selector, _template, _templateUrl){
 this.__getCurrentPath = function(){
     return _currentPath;
 }
+var _onChangeListner = {};
+this.__onChange = function(_id, _fnc){
+    //On change Implementation
+}
 this.serialize = function(){
     var _localInstance = JSON.parse(JSON.stringify(this));
     delete _localInstance.__bind;

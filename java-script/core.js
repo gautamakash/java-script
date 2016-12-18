@@ -19,6 +19,12 @@ var System = function(_settings){
     
     this.debug = (_settings && _settings.debug)?_settings.debug:false; // src folder for the application
     /**
+     * Privat variables
+     */
+    
+    this.beanConfig = (_settings && _settings.beanFactory)?_settings.beanFactory:false;
+    
+    /**
      * Public Methods
      */
     this.import = function (_filePath) {
@@ -132,4 +138,37 @@ var System = function(_settings){
             }
         }
     }
+    this.beans = {};
+    this.getBean = function(_class, _id){
+        if(this.beanConfig && this.beanConfig[_class]){
+            this.import(_class);
+            var _beanConfig = this.beanConfig[_class];
+            var _data = {};
+            var _dataUrl = false;
+            if(_beanConfig.url){
+                _dataUrl = _beanConfig.url;
+                _dataUrl = _dataUrl.replace("{{id}}", _id);
+                var _dataString = this.getFile(_dataUrl, true, this);
+                _data = JSON.parse(_dataString);
+                _data.__url = _dataUrl;
+            }
+            if(_dataUrl && this.beans[_dataUrl]){
+                return this.beans[_dataUrl];
+            }else if(this.beans[_class+'_'+_id]){
+                return this.beans[_class+'_'+_id];
+            }
+            var _classObj = window;
+            var _classArr = _class.split('.');
+            for(var _classI = 0; _classI < _classArr.length; _classI++){
+                _classObj = _classObj[_classArr[_classI]];
+            }
+            var _bean = new _classObj(_data);
+            if(_dataUrl){
+                this.beans[_dataUrl] = _bean;
+            }else{
+                this.beans[_class+'_'+_id] = _bean;
+            }
+            return _bean;
+        }
+    } 
 }
