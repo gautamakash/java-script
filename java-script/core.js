@@ -125,7 +125,7 @@ var System = function(_settings){
             if(_key.indexOf("#import") == 0){
                 var _importConfigStr = _key.substring(8,_key.length);
                 var _importConfig = JSON.parse(_importConfigStr);
-                console.log(_importConfig);
+                //console.log(_importConfig);
                 _instance.__getSystem().import(_importConfig.package);
                 var _importObj = _instance.__getSystem().getBean(_importConfig.package, _importConfig.id);
                 if(_importConfig.data && _importConfig.data.indexOf(".") == -1){

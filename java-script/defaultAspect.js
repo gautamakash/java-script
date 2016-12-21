@@ -36,11 +36,28 @@ this.__update = function(){
     _change(this);
 }
 
+// triger update te reload template import
+this.__reRender = function(){
+    this.__bind.splice(0,this.__bind.length);
+    if(__render_selector){
+        if(__render_template || __render_templateUrl){
+            this.__render(__render_selector, __render_template, __render_templateUrl);
+        }else{
+            this.__render(__render_selector);
+        }
+    }
+}
+var __render_selector = false;
+var __render_template = false;
+var __render_templateUrl = false;
 // instance 
 var _instance = this;
 
 // Render template
 this.__render=function(_selector, _template, _templateUrl){
+    __render_selector = _selector;
+    __render_template = _template;
+    __render_templateUrl = _templateUrl;
     if(!_template && _templateUrl){
         _template = systems[_system].getFile(_templateUrl, false, systems[_system]);
     }
