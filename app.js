@@ -3,6 +3,9 @@ var system = new System({
     beanFactory:{
         "com.magnifyall.product.Laptop":{
             url: "data/product/{{id}}.json"
+        },
+        "com.magnifyall.product.Bag":{
+            url: "data/product/{{id}}.json"
         }
     }
 });

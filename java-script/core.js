@@ -99,28 +99,63 @@ var System = function(_settings){
             console.error(e);
         }
         var _variables = {};
+        
+        /**
+         * process data
+         */
         templateStr = templateStr.replace(/{{[a-zA-z-.]{0,}}}/g, function(all) {
-            var _key = all.split("{{")[1].split("}}")[0];
-            /*var _keyArr = _key.split(".");
-            var _value = _instance[_keyArr[0]];
-            for(var _keyI = 1; _keyI< _keyArr.length; _keyI++){
-                _value = _value[_keyArr[_keyI]];
-            }
-            return _value;*/
+            var _key = all.substring(2,all.length-2);
+            //var _key = all.split("{{")[1].split("}}")[0];
             var _keyClass = _key.replace(/\./g, '_');
             var _placeholder = '<span data-system-bind="'+_key+'" class="'+_keyClass+'"></span>';
             _variables[_keyClass]=_key;
             return _placeholder;
         });
+        
+        /**
+         * process expressionn
+         */
+        
+        var _imports = {};
+        templateStr = templateStr.replace(/{{#.*:.*}}/g, function(all) {
+            var _key = all.substring(2,all.length-2);
+            /**
+             * import
+             */
+            if(_key.indexOf("#import") == 0){
+                var _importConfigStr = _key.substring(8,_key.length);
+                var _importConfig = JSON.parse(_importConfigStr);
+                console.log(_importConfig);
+                _instance.__getSystem().import(_importConfig.package);
+                var _importObj = _instance.__getSystem().getBean(_importConfig.package, _importConfig.id);
+                if(_importConfig.data && _importConfig.data.indexOf(".") == -1){
+                    _instance[_importConfig.data] = _importObj;
+                }
+                var _importKey = _importConfig.package.replace(/\./g, '_')+"_"+_importConfig.id;
+                _imports[_importKey] = _importObj;
+                var _placeholder = '<div data-system-bind="'+_importKey+'" class="'+_importKey+'"></div>';
+                return _placeholder;
+            }
+            return all;
+        });
+        
         //console.log(_variables);
         //console.log(templateStr);
         _target.innerHTML = templateStr;
         for(var _key in _variables){
-            var _bindEles = document.querySelectorAll('.'+_key);
+            var _bindEles = _target.querySelectorAll('.'+_key);
             for(var _bindI = 0; _bindI< _bindEles.length; _bindI++){
                 _instance.__paint(_bindEles[_bindI], _variables[_key]);
             }
         }
+        
+        for(var _key in _imports){
+            var _bindEles = _target.querySelectorAll('.'+_key);
+            for(var _bindI = 0; _bindI< _bindEles.length; _bindI++){
+                _imports[_key].__render("."+_key);
+            }
+        }
+        
     };
     
     // Bean factory beans

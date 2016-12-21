@@ -49,7 +49,10 @@ this.__render=function(_selector, _template, _templateUrl){
         systems[_system].processTemplate(_target, _currentPath, _template, this);
     }
 }
-
+// get systems
+this.__getSystem = function(){
+    return systems[_system];
+}
 // get data current path
 this.__getCurrentPath = function(){
     return _currentPath;
